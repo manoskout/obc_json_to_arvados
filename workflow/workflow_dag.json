@@ -1,0 +1,253 @@
+{
+    "environment_variables": {
+        "OBC_WORKFLOW_NAME": "my_fab_wf",
+        "OBC_WORKFLOW_EDIT": "2",
+        "OBC_NICE_ID": "my_fab_wf__2",
+        "OBC_RANDOM_NICE_ID": "TSgb2",
+        "OBC_SERVER": "http://0.0.0.0:8200/platform"
+    },
+    "steps": {
+        "INIT_STEP": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n\n\n\n\nif [ -n \"${OBC_WORK_PATH}\" ] ; then\n    export OBC_REPORT_PATH=${OBC_WORK_PATH}/${OBC_NICE_ID}.html\n    export OBC_REPORT_DIR=${OBC_WORK_PATH}/${OBC_NICE_ID}\n    mkdir -p ${OBC_REPORT_DIR}\n    echo \"OBC: Report filename: ${OBC_REPORT_PATH}\"\n\ncat > ${OBC_REPORT_PATH} << OBCENDOFFILE\n<!DOCTYPE html>\n<html lang=\"en\">\n   <head>\n      <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n   </head>\n   <body>\n   <p>\n   OpenBio Server: <a href=\"${OBC_SERVER}\">${OBC_SERVER}</a> <br>\n   Workflow: <a href=\"${OBC_SERVER}/w/${OBC_WORKFLOW_NAME}/${OBC_WORKFLOW_EDIT}\">${OBC_WORKFLOW_NAME}/${OBC_WORKFLOW_EDIT}</a> <br>\n\n   <p>\n   <h3>Intermediate Variables:</h3>\n   <ul>\n      <!-- {{INTERMEDIATE_VARIABLE}} -->\n   </ul>\n\n   <p>\n   <h3>Output Variables:</h3>\n   <ul>\n      <!-- {{OUTPUT_VARIABLE}} -->\n   </ul>\n\n   </body>\n</html>\nOBCENDOFFILE\nfi\n\n\n\ncat > ${OBC_WORK_PATH}/obc_functions.sh << 'OBCENDOFFILE'\n\n\n\nexport OBC_REPORT_PATH=${OBC_WORK_PATH}/${OBC_NICE_ID}.html\nexport OBC_REPORT_DIR=${OBC_WORK_PATH}/${OBC_NICE_ID}\n\nfunction REPORT() {\n    if [ -n \"${OBC_WORK_PATH}\" ] ; then\n        local VAR=$1\n        local TIMENOW=$(date)\n        local WHOCALLEDME=$(caller 0 | awk '{print $2}')\n\n        if [ -z $3 ] ; then\n            local TAG=INTERMEDIATE_VARIABLE\n        else\n            local TAG=$3\n        fi\n\n        if [ ${TAG} == \"INTERMEDIATE_VARIABLE\" ] ; then\n            local EXTRA=\"${TIMENOW}. Called from: ${WHOCALLEDME}\"\n        else\n            local EXTRA=\"\"\n        fi\n\n        local FILEKIND=$(file \"${2}\")\n        # echo \"OBC: FILE RESULT ${FILEKIND}\"\n        if [[ $FILEKIND == *\"PNG image data\"* ]]; then\n           local NEWFILENAME=${OBC_REPORT_DIR}/$(basename ${2})\n           local LOCALFILENAME=${OBC_NICE_ID}/$(basename ${2})\n           cp ${2} ${NEWFILENAME}\n           local HTML=\"<li>${EXTRA} ${VAR}: <br><img src=\\\"${LOCALFILENAME}\\\"></li>\\\\\\\\n      <!-- {{${TAG}}} -->\\\\\\\\n\"\n        elif [[ $FILEKIND == *\"PDF document\"* ]]; then\n           local NEWFILENAME=${OBC_REPORT_DIR}/$(basename ${2})\n           local LOCALFILENAME=${OBC_NICE_ID}/$(basename ${2})\n           cp ${2} ${NEWFILENAME}\n           local HTML=\"<li>${EXTRA} ${VAR}: <br><a href=\\\"${LOCALFILENAME}\\\">${LOCALFILENAME}</a></li>\\\\\\\\n      <!-- {{${TAG}}} -->\\\\\\\\n\"\n        else\n           local VALUE=$(echo \"${2}\" | sed 's/&/\\\\\\&amp;/g; s/</\\\\\\&lt;/g; s/>/\\\\\\&gt;/g; s/\"/\\\\\\&quot;/g; s/'\"'\"'/\\\\\\&#39;/g')\n           local HTML=\"<li>${EXTRA} ${VAR}=${VALUE}</li>\\\\\\\\n      <!-- {{${TAG}}} -->\\\\\\\\n\"\n        fi\n\n        sed -i -e \"s|<\\!-- {{${TAG}}} -->|${HTML}|\" ${OBC_REPORT_PATH}\n        sed 's/\\\\n/\\\n/g' ${OBC_REPORT_PATH} > ${OBC_REPORT_PATH}.tmp\n        mv ${OBC_REPORT_PATH}.tmp ${OBC_REPORT_PATH}\n    fi\n}\n\n\n\nOBCENDOFFILE\n\ntouch ${OBC_WORK_PATH}/TSgb2_inputs.sh\n",
+            "run_after": [],
+            "type": "initial"
+        },
+        "wget__latest__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n### BASH INSTALLATION COMMANDS FOR TOOL: wget/latest/1\necho \"OBC: INSTALLING TOOL: wget/latest/1\"\n(\n:\n# Insert the BASH commands that install this tool\n# You can use these environment variables: \n# ${OBC_TOOL_PATH}: path to tools directory \n# ${OBC_DATA_PATH}: path to data directory\n\napt-get update\napt-get install -y wget \n)\necho \"OBC: INSTALLATION OF TOOL: wget/latest/1 . COMPLETED\"\n### END OF INSTALLATION COMMANDS FOR TOOL: wget/latest/1\n\n### BASH VALIDATION COMMANDS FOR TOOL: wget/latest/1\necho \"OBC: VALIDATING THE INSTALLATION OF THE TOOL: wget/latest/1\"\n(\n:\n# Insert the BASH commands that confirm that this tool is correctly installed\n# In success, this script should return 0 exit code.\n# A non-zero exit code, means failure to validate installation.\n\nwhich wget\n)\nif [ $? -eq 0 ] ; then\n   echo \"OBC: VALIDATION FOR TOOL: wget/latest/1 SUCCEEDED\"\nelse\n   echo \"OBC: VALIDATION FOR TOOL: wget/latest/1 FAILED\"\nfi\n\n### END OF VALIDATION COMMANDS FOR TOOL: wget/latest/1\n\n### SETTING TOOL VARIABLES FOR: wget/latest/1\nexport wget__latest__1__path=\"/usr/bin/wget\" # path to exec \necho \"OBC: SET wget__latest__1__path=\\\"$wget__latest__1__path\\\"   <-- path to exec \"\n### END OF SETTING TOOL VARIABLES FOR: wget/latest/1\n\n### CREATING BASH WITH TOOL VARIABLES\ncat > ${OBC_WORK_PATH}/wget__latest__1_VARS.sh << ENDOFFILE\nwget__latest__1__path=\"/usr/bin/wget\"\nENDOFFILE\n",
+            "run_after": [
+                "INIT_STEP"
+            ],
+            "type": "tool_installation"
+        },
+        "unzip__latest__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n### BASH INSTALLATION COMMANDS FOR TOOL: unzip/latest/1\necho \"OBC: INSTALLING TOOL: unzip/latest/1\"\n### READING VARIABLES FROM ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n\n(\n:\n# Insert the BASH commands that install this tool\n# You can use these environment variables: \n# ${OBC_TOOL_PATH}: path to tools directory \n# ${OBC_DATA_PATH}: path to data directory\n\napt-get install -y unzip \n)\necho \"OBC: INSTALLATION OF TOOL: unzip/latest/1 . COMPLETED\"\n### END OF INSTALLATION COMMANDS FOR TOOL: unzip/latest/1\n\n### BASH VALIDATION COMMANDS FOR TOOL: unzip/latest/1\necho \"OBC: VALIDATING THE INSTALLATION OF THE TOOL: unzip/latest/1\"\n(\n:\n# Insert the BASH commands that confirm that this tool is correctly installed\n# In success, this script should return 0 exit code.\n# A non-zero exit code, means failure to validate installation.\n\nwhich unzip\n\n)\nif [ $? -eq 0 ] ; then\n   echo \"OBC: VALIDATION FOR TOOL: unzip/latest/1 SUCCEEDED\"\nelse\n   echo \"OBC: VALIDATION FOR TOOL: unzip/latest/1 FAILED\"\nfi\n\n### END OF VALIDATION COMMANDS FOR TOOL: unzip/latest/1\n\n### SETTING TOOL VARIABLES FOR: unzip/latest/1\nexport unzip__latest__1__path=\"/usr/bin/unzip\" # path to exec \necho \"OBC: SET unzip__latest__1__path=\\\"$unzip__latest__1__path\\\"   <-- path to exec \"\n### END OF SETTING TOOL VARIABLES FOR: unzip/latest/1\n\n### CREATING BASH WITH TOOL VARIABLES\ncat > ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh << ENDOFFILE\nunzip__latest__1__path=\"/usr/bin/unzip\"\nENDOFFILE\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1"
+            ],
+            "type": "tool_installation"
+        },
+        "python__3_8__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n### BASH INSTALLATION COMMANDS FOR TOOL: python/3.8/1\necho \"OBC: INSTALLING TOOL: python/3.8/1\"\n### READING VARIABLES FROM ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n\n(\n:\n# Insert the BASH commands that install this tool\n# You can use these environment variables: \n# ${OBC_TOOL_PATH}: path to tools directory \n# ${OBC_DATA_PATH}: path to data directory\n\napt-get install -y python3.8\n)\necho \"OBC: INSTALLATION OF TOOL: python/3.8/1 . COMPLETED\"\n### END OF INSTALLATION COMMANDS FOR TOOL: python/3.8/1\n\n### BASH VALIDATION COMMANDS FOR TOOL: python/3.8/1\necho \"OBC: VALIDATING THE INSTALLATION OF THE TOOL: python/3.8/1\"\n(\n:\n# Insert the BASH commands that confirm that this tool is correctly installed\n# In success, this script should return 0 exit code.\n# A non-zero exit code, means failure to validate installation.\n\nwhich python3.8\n\n)\nif [ $? -eq 0 ] ; then\n   echo \"OBC: VALIDATION FOR TOOL: python/3.8/1 SUCCEEDED\"\nelse\n   echo \"OBC: VALIDATION FOR TOOL: python/3.8/1 FAILED\"\nfi\n\n### END OF VALIDATION COMMANDS FOR TOOL: python/3.8/1\n\n### SETTING TOOL VARIABLES FOR: python/3.8/1\nexport python__3_8__1__path=\"/usr/bin/python3.8\" # zxcvzxcv \necho \"OBC: SET python__3_8__1__path=\\\"$python__3_8__1__path\\\"   <-- zxcvzxcv \"\n### END OF SETTING TOOL VARIABLES FOR: python/3.8/1\n\n### CREATING BASH WITH TOOL VARIABLES\ncat > ${OBC_WORK_PATH}/python__3_8__1_VARS.sh << ENDOFFILE\npython__3_8__1__path=\"/usr/bin/python3.8\"\nENDOFFILE\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1"
+            ],
+            "type": "tool_installation"
+        },
+        "plink__1_07_x86_64__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n### BASH INSTALLATION COMMANDS FOR TOOL: plink/1.07_x86_64/1\necho \"OBC: INSTALLING TOOL: plink/1.07_x86_64/1\"\n### READING VARIABLES FROM ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n\n(\n:\n# Insert the BASH commands that install this tool\n# You can use these environment variables: \n# ${OBC_TOOL_PATH}: path to tools directory \n# ${OBC_DATA_PATH}: path to data directory\n\n${wget__latest__1__path}  -O ${OBC_TOOL_PATH}/plink-1.07-x86_64.zip \"https://zzz.bwh.harvard.edu/plink/dist/plink-1.07-x86_64.zip\"\n\n${unzip__latest__1__path} ${OBC_TOOL_PATH}/plink-1.07-x86_64.zip -d ${OBC_TOOL_PATH}\n\n\n)\necho \"OBC: INSTALLATION OF TOOL: plink/1.07_x86_64/1 . COMPLETED\"\n### END OF INSTALLATION COMMANDS FOR TOOL: plink/1.07_x86_64/1\n\n### BASH VALIDATION COMMANDS FOR TOOL: plink/1.07_x86_64/1\necho \"OBC: VALIDATING THE INSTALLATION OF THE TOOL: plink/1.07_x86_64/1\"\n(\n:\n# Insert the BASH commands that confirm that this tool is correctly installed\n# In success, this script should return 0 exit code.\n# A non-zero exit code, means failure to validate installation.\n\n${OBC_TOOL_PATH}/plink-1.07-x86_64/plink --help\n\n)\nif [ $? -eq 0 ] ; then\n   echo \"OBC: VALIDATION FOR TOOL: plink/1.07_x86_64/1 SUCCEEDED\"\nelse\n   echo \"OBC: VALIDATION FOR TOOL: plink/1.07_x86_64/1 FAILED\"\nfi\n\n### END OF VALIDATION COMMANDS FOR TOOL: plink/1.07_x86_64/1\n\n### SETTING TOOL VARIABLES FOR: plink/1.07_x86_64/1\nexport plink__1_07_x86_64__1__path=\"${OBC_TOOL_PATH}/plink-1.07-x86_64/plink\" # path to exec \necho \"OBC: SET plink__1_07_x86_64__1__path=\\\"$plink__1_07_x86_64__1__path\\\"   <-- path to exec \"\n### END OF SETTING TOOL VARIABLES FOR: plink/1.07_x86_64/1\n\n### CREATING BASH WITH TOOL VARIABLES\ncat > ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh << ENDOFFILE\nplink__1_07_x86_64__1__path=\"${OBC_TOOL_PATH}/plink-1.07-x86_64/plink\"\nENDOFFILE\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1"
+            ],
+            "type": "tool_installation"
+        },
+        "test_script__1__2": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n### BASH INSTALLATION COMMANDS FOR TOOL: test_script/1/2\necho \"OBC: INSTALLING TOOL: test_script/1/2\"\n### READING VARIABLES FROM ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n\n### READING VARIABLES FROM ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n\n(\n:\n# Insert the BASH commands that install this tool\n# You can use these environment variables: \n# ${OBC_TOOL_PATH}: path to tools directory \n# ${OBC_DATA_PATH}: path to data directory\n\ncat > ${OBC_TOOL_PATH}/script.py << EOF\nimport sys\n\ns = []\nwith open(sys.argv[1]) as f:\n  \n  f.readline()\n  ls = f.readline().split()\n  s.append(float(ls[4]))\n\nresult = sum(s)/len(s)\n\nwith open(sys.argv[2], 'w') as f:\n   f.write(str(result) + '\\n')\n\nprint ('script OK')\n\nEOF\n)\necho \"OBC: INSTALLATION OF TOOL: test_script/1/2 . COMPLETED\"\n### END OF INSTALLATION COMMANDS FOR TOOL: test_script/1/2\n\n### BASH VALIDATION COMMANDS FOR TOOL: test_script/1/2\necho \"OBC: VALIDATING THE INSTALLATION OF THE TOOL: test_script/1/2\"\n(\n:\n# Insert the BASH commands that confirm that this tool is correctly installed\n# In success, this script should return 0 exit code.\n# A non-zero exit code, means failure to validate installation.\n\nexit 0\n\n)\nif [ $? -eq 0 ] ; then\n   echo \"OBC: VALIDATION FOR TOOL: test_script/1/2 SUCCEEDED\"\nelse\n   echo \"OBC: VALIDATION FOR TOOL: test_script/1/2 FAILED\"\nfi\n\n### END OF VALIDATION COMMANDS FOR TOOL: test_script/1/2\n\n### SETTING TOOL VARIABLES FOR: test_script/1/2\nexport test_script__1__2__path=\"${OBC_TOOL_PATH}/script.py\" # path to script \necho \"OBC: SET test_script__1__2__path=\\\"$test_script__1__2__path\\\"   <-- path to script \"\n### END OF SETTING TOOL VARIABLES FOR: test_script/1/2\n\n### CREATING BASH WITH TOOL VARIABLES\ncat > ${OBC_WORK_PATH}/test_script__1__2_VARS.sh << ENDOFFILE\ntest_script__1__2__path=\"${OBC_TOOL_PATH}/script.py\"\nENDOFFILE\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1"
+            ],
+            "type": "tool_installation"
+        },
+        "step__main_step__my_fab_wf__2__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n:\n# Insert the BASH commands for this step.\n# You can use the variable ${OBC_WORK_PATH} as your working directory.\n# Also read the Documentation about the REPORT and the PARALLEL commands.\n\nFN=TEST\n\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2"
+            ],
+            "type": "simple"
+        },
+        "step__create_dataset__my_fab_wf__2__1": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n:\n# Insert the BASH commands for this step.\n# You can use the variable ${OBC_WORK_PATH} as your working directory.\n# Also read the Documentation about the REPORT and the PARALLEL commands.\n\nMAP=${OBC_WORK_PATH}/${FN}.map\nPED=${OBC_WORK_PATH}/${FN}.ped\n\ncat > ${MAP} << EOF\n1 snp1 0 1\n1 snp2 0 2\nEOF\n\ncat > ${PED} << EOF\n1 1 0 0 1  1  A A  G T\n2 1 0 0 1  1  A C  T G\n3 1 0 0 1  1  C C  G G\n4 1 0 0 1  2  A C  T T\n5 1 0 0 1  2  C C  G T\n6 1 0 0 1  2  C C  T T\nEOF\n\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__create_dataset__my_fab_wf__2__1_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__1"
+            ],
+            "type": "simple"
+        },
+        "step__main_step__my_fab_wf__2__2": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__create_dataset__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n\n\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__2_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__1",
+                "step__create_dataset__my_fab_wf__2__1"
+            ],
+            "type": "simple"
+        },
+        "step__main_step__my_fab_wf__2__3": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__2_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n:\n\n${plink__1_07_x86_64__1__path}    --noweb    --file ${OBC_WORK_PATH}/${FN}     --freq     --out ${OBC_WORK_PATH}/freqs\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__3_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__2"
+            ],
+            "type": "tool_invocation",
+            "tool_to_call": "plink__1_07_x86_64__1"
+        },
+        "step__main_step__my_fab_wf__2__4": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__create_dataset__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__2_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__3_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n\n   \nRESULT_FN=${OBC_WORK_PATH}/result.txt\n\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__4_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__1",
+                "step__create_dataset__my_fab_wf__2__1",
+                "step__main_step__my_fab_wf__2__2",
+                "step__main_step__my_fab_wf__2__3"
+            ],
+            "type": "simple"
+        },
+        "step__main_step__my_fab_wf__2__5": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__4_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n:\n\n${python__3_8__1__path}    ${test_script__1__2__path}    ${OBC_WORK_PATH}/freqs.frq     ${RESULT_FN}\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__5_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__4"
+            ],
+            "type": "tool_invocation",
+            "tool_to_call": "python__3_8__1"
+        },
+        "step__main_step__my_fab_wf__2__6": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/TSgb2_inputs.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__create_dataset__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__2_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__3_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__4_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__5_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nOBC_START=$(eval \"declare\")\n\n\noutput__outp__my_fab_wf__2=$(<${RESULT_FN})\n\n\n\nOBC_CURRENT=$(eval \"declare\")\ncomm -3 <(echo \"$OBC_START\" | grep -v \"_=\" | sort) <(echo \"$OBC_CURRENT\" | grep -v OBC_START | grep -v PIPESTATUS | grep -v \"_=\" | sort) > ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__6_VARS.sh\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__1",
+                "step__create_dataset__my_fab_wf__2__1",
+                "step__main_step__my_fab_wf__2__2",
+                "step__main_step__my_fab_wf__2__3",
+                "step__main_step__my_fab_wf__2__4",
+                "step__main_step__my_fab_wf__2__5"
+            ],
+            "type": "simple"
+        },
+        "FINAL_STEP": {
+            "bash": "export OBC_WORKFLOW_NAME=my_fab_wf\nexport OBC_WORKFLOW_EDIT=2\nexport OBC_NICE_ID=TSgb2\nexport OBC_SERVER=http://0.0.0.0:8200/platform\n\n. ${OBC_WORK_PATH}/wget__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/unzip__latest__1_VARS.sh\n. ${OBC_WORK_PATH}/python__3_8__1_VARS.sh\n. ${OBC_WORK_PATH}/plink__1_07_x86_64__1_VARS.sh\n. ${OBC_WORK_PATH}/test_script__1__2_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__create_dataset__my_fab_wf__2__1_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__2_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__3_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__4_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__5_VARS.sh\n. ${OBC_WORK_PATH}/step__main_step__my_fab_wf__2__6_VARS.sh\n. ${OBC_WORK_PATH}/obc_functions.sh\nREPORT output__outp__my_fab_wf__2 ${output__outp__my_fab_wf__2} OUTPUT_VARIABLE \n\n\nOBC_REPORT_TGZ=${OBC_WORK_PATH}/${OBC_NICE_ID}.tgz\n\n#echo \"RUNNING: \"\n#echo \"tar zcf ${OBC_REPORT_TGZ} -C ${OBC_WORK_PATH} ${OBC_NICE_ID}.html ${OBC_NICE_ID}/\"\n\ntar zcf ${OBC_REPORT_TGZ} -C ${OBC_WORK_PATH} ${OBC_NICE_ID}.html ${OBC_NICE_ID}/\n\necho \"{\\\"output__outp__my_fab_wf__2\\\": \\\"${output__outp__my_fab_wf__2}\\\"}\"\n",
+            "run_after": [
+                "INIT_STEP",
+                "wget__latest__1",
+                "unzip__latest__1",
+                "python__3_8__1",
+                "plink__1_07_x86_64__1",
+                "test_script__1__2",
+                "step__main_step__my_fab_wf__2__1",
+                "step__create_dataset__my_fab_wf__2__1",
+                "step__main_step__my_fab_wf__2__2",
+                "step__main_step__my_fab_wf__2__3",
+                "step__main_step__my_fab_wf__2__4",
+                "step__main_step__my_fab_wf__2__5",
+                "step__main_step__my_fab_wf__2__6"
+            ],
+            "type": "final"
+        }
+    },
+    "input_parameters": {},
+    "output_parameters": {
+        "output__outp__my_fab_wf__2": {
+            "description": "fabulous result",
+            "belongto": {
+                "name": "my_fab_wf",
+                "edit": 2
+            }
+        }
+    },
+    "first_step": "step__main_step__my_fab_wf__2__1",
+    "DAG": {
+        "INIT_STEP": [],
+        "wget__latest__1": [
+            "INIT_STEP"
+        ],
+        "unzip__latest__1": [
+            "wget__latest__1"
+        ],
+        "python__3_8__1": [
+            "unzip__latest__1"
+        ],
+        "plink__1_07_x86_64__1": [
+            "python__3_8__1"
+        ],
+        "test_script__1__2": [
+            "plink__1_07_x86_64__1"
+        ],
+        "step__main_step__my_fab_wf__2__1": [
+            "test_script__1__2"
+        ],
+        "step__create_dataset__my_fab_wf__2__1": [
+            "step__main_step__my_fab_wf__2__1"
+        ],
+        "step__main_step__my_fab_wf__2__2": [
+            "step__create_dataset__my_fab_wf__2__1"
+        ],
+        "step__main_step__my_fab_wf__2__3": [
+            "step__main_step__my_fab_wf__2__2"
+        ],
+        "step__main_step__my_fab_wf__2__4": [
+            "step__main_step__my_fab_wf__2__3"
+        ],
+        "step__main_step__my_fab_wf__2__5": [
+            "step__main_step__my_fab_wf__2__4"
+        ],
+        "step__main_step__my_fab_wf__2__6": [
+            "step__main_step__my_fab_wf__2__5"
+        ],
+        "FINAL_STEP": [
+            "step__main_step__my_fab_wf__2__6"
+        ]
+    },
+    "environments": {
+        "0": {
+            "unzip__latest__1": [
+                "wget__latest__1"
+            ],
+            "plink__1_07_x86_64__1": [
+                "wget__latest__1",
+                "unzip__latest__1"
+            ],
+            "wget__latest__1": []
+        },
+        "1": {
+            "python__3_8__1": [],
+            "test_script__1__2": [
+                "python__3_8__1"
+            ]
+        }
+    }
+}
+
