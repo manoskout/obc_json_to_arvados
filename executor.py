@@ -3,7 +3,7 @@ import os
 import json
 import logging
 import networkx as nx
-from CWLExecutor impoer CWLExecutor
+from CWLExecutor import CWLExecutor
 
 
 
@@ -59,8 +59,11 @@ class Workflow:
         log_info("Workflow steps: ")
         log_info(self.wf_steps)
         log_info("Workflow dependencies: ")
-        for item in self.step_dependencies:
-            print(f"{item}")
+        for index,item in enumerate(self.step_dependencies):
+            if index==1:
+                print(f"{item}")
+                bash=self.get_bash_commands(item[0])
+        #     print("\n")
         # log_info(self.step_dependencies)
 
     def get_steps(self,):
@@ -78,6 +81,12 @@ class Workflow:
         for step in self.wf_steps:
             yield (step, self.workflow["steps"][step]["run_after"], self.workflow["steps"][step]["type"])
 
+    def get_bash_commands(self,step):
+        """
+        Returns the bash file of the selected step
+        """
+        print(self.workflow["steps"][step]["bash"])
+        return self.workflow["steps"][step]["bash"]
     def parse_workflow(self):
         '''
         Parse the workflow by identifying the steps, dependencies
