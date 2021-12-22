@@ -6,7 +6,6 @@ import networkx as nx
 from CWLExecutor import CWLExecutor
 
 
-
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -34,7 +33,7 @@ def retrieve_workflow(workflow_file):
     '''
     try:
         wf = open(workflow_file)
-        print("File exists")
+        # print("File exists")
         workflow = json.load(wf)
     except OSError:
         print("Could not open/read file: ", workflow_file)
@@ -59,10 +58,10 @@ class Workflow:
         log_info("Workflow steps: ")
         log_info(self.wf_steps)
         log_info("Workflow dependencies: ")
-        for index,item in enumerate(self.step_dependencies):
-            if index==1:
-                print(f"{item}")
-                bash=self.get_bash_commands(item[0])
+        # for index, item in enumerate(self.step_dependencies):
+        # if index == 1:
+        # print(item)
+        # bash = self.get_bash_commands(item[0])
         #     print("\n")
         # log_info(self.step_dependencies)
 
@@ -75,18 +74,23 @@ class Workflow:
     def get_step_generator(self):
         """
         Return a dict that the key is the step that depends on its value.
-        Also there are two more keys (main,final) that are the first and 
+        Also there are two more keys (main,final) that are the first and
         the final respectively
         """
         for step in self.wf_steps:
-            yield (step, self.workflow["steps"][step]["run_after"], self.workflow["steps"][step]["type"])
+            yield (
+                step,
+                self.workflow["steps"][step]["run_after"],
+                self.workflow["steps"][step]["type"]
+            )
 
-    def get_bash_commands(self,step):
+    def get_bash_commands(self, step):
         """
         Returns the bash file of the selected step
         """
         print(self.workflow["steps"][step]["bash"])
         return self.workflow["steps"][step]["bash"]
+
     def parse_workflow(self):
         '''
         Parse the workflow by identifying the steps, dependencies
@@ -98,8 +102,11 @@ class Workflow:
         else:
             self.wf_steps = None
             self.step_dependencies = None
-            raise JSON_CWLParserException(f"The workflow does not exist. Workflow : {self.workflow}")
-        self.get_wf_info()
+            raise JSON_CWLParserException(
+                "The workflow does not exist. Workflow : {}"
+                .format(self.workflow)
+            )
+        # self.get_wf_info()
 
 
 if __name__ == '__main__':
@@ -145,3 +152,6 @@ if __name__ == '__main__':
 
     workflow = Workflow(
         workflow_file=args.workflow_filename, input_variables=None)
+    e = CWLExecutor(workflow)
+    e.build()
+

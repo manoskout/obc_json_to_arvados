@@ -3,28 +3,21 @@ import sys
 import ruamel.yaml as yaml
 
 
-
 class ExecutorException(Exception):
     pass
 
 
-class BaseExecutor():
-    def __init__(self, workflow, global_env_vars, inputs, outputs):
+def convert_to_yaml(wf_file):
+    return yaml.dump(wf_file, sys.stdout)
+
+
+class CWLExecutor():
+    def __init__(self, workflow, workflow_directory=None):
         self.workflow = workflow
-        self.global_env_vars = global_env_vars
-        self.inputs = inputs
-        self.outputs = outputs
-
-
-def convert_to_yaml(workflow):
-    return yaml.dump(workflow, sys.stdout)
-
-
-class CWLExecutor(BaseExecutor):
-    def __init__(self, workflow_directory):
         self.workflow_directory = workflow_directory
-        if not os.path.exists(workflow):
-            os.makedir(self.workflow_directory)
+        self.wf_global_envs = self.workflow.global_env_var()
+        # if not os.path.exists(self.workflow):
+        # os.makedir(self.workflow_directory)
 
     def wf_template(self, obc_inputs, obc_outputs, outputs_path, wf_steps):
         return {
@@ -61,7 +54,7 @@ class CWLExecutor(BaseExecutor):
                         "EnvVarRequirements": {
                             "envDef": {
                                 self.global_env_vars,
-                                },
+                            },
                         },
                     },
                 },
@@ -88,3 +81,13 @@ class CWLExecutor(BaseExecutor):
                 "outputs": self.outputs
 
             }
+
+    def build(self,):
+        for index, (
+                step,
+                dep,
+                step_type
+        ) in enumerate(self.workflow.get_step_generator()):
+        	
+            print(index)
+            # print(f"Step: {step} \tType: {step_type}\tDependencies: {dep}")
