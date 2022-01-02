@@ -2,7 +2,7 @@ import argparse
 import os
 import json
 import logging
-import networkx as nx
+# import networkx as nx
 from CWLExecutor import CWLExecutor
 
 
@@ -52,8 +52,14 @@ class Workflow:
         self.parse_workflow()
 
     def global_env_var(self,):
+        """
+        The global environment variables should be exposed at each node
+        Return the global environment variables
+        """
         return self.workflow["environment_variables"]
-
+    def get_workflow_id(self,):
+        return self.workflow["environment_variables"]["OBC_NICE_ID"]
+        
     def get_wf_info(self,):
         log_info("Workflow steps: ")
         log_info(self.wf_steps)
@@ -70,7 +76,10 @@ class Workflow:
         Return the steps of the workflow
         '''
         return self.workflow["steps"].keys()
-
+    def get_bash_commands(self, step):
+        """
+        """
+        return self.workflow[step]["bash"]
     def get_step_generator(self):
         """
         Return a dict that the key is the step that depends on its value.
@@ -83,12 +92,20 @@ class Workflow:
                 self.workflow["steps"][step]["run_after"],
                 self.workflow["steps"][step]["type"]
             )
+    def get_first_step(self,):
+        for step in self.wf_steps:
+            if self.workflow["steps"][step]["type"]=="initial":
+                return (step,self.workflow["steps"][step]["run_after"],self.workflow["steps"][step]["type"])
+    def get_last_step(self,):
+        for step in self.wf_steps:
+            if self.workflow["steps"][step]["type"]=="final":
+                return (step,self.workflow["steps"][step]["run_after"],self.workflow["steps"][step]["type"])
 
     def get_bash_commands(self, step):
         """
         Returns the bash file of the selected step
         """
-        print(self.workflow["steps"][step]["bash"])
+        # print(self.workflow["steps"][step]["bash"])
         return self.workflow["steps"][step]["bash"]
 
     def parse_workflow(self):
